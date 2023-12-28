@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Registration{% endblock %}
+
+{% block content %}
+<style>
+    .errorlist{
+        color: red;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <h3 style="text-align: center; font-size: xx-large; text-transform: uppercase; background: linear-gradient(to left, white, rgb(33, 34, 34), white);color: white; padding: 5px 0; margin: -10px; width: 100%;">Customer Registration Form</h3><hr>
+            <form action="" method="POST" style="margin-left: 13rem;" >
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="btn btn-dark" style="margin-left: 4rem;" >Register as a Customer</button>
+            </form>
+            <p style="text-align: center;"> Already have an account? <a href="{% url 'ecomapp:customerlogin' %}">Login here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
