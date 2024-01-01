@@ -114,6 +114,8 @@ class AddToCartView(EcomMixin, TemplateView):
             if this_product_in_cart.exists():
                 cartproduct = this_product_in_cart.last()
                 cartproduct.quantity += 1
+                product_obj.stock_quantity -= 1
+                product_obj.save()
                 cartproduct.subtotal += product_obj.selling_price
                 cartproduct.save()
                 cart_obj.total += product_obj.selling_price
@@ -177,7 +179,7 @@ class ManageCartView(EcomMixin, View):
 
 
 class EmptyCartView(EcomMixin, View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         cart_id = request.session.get("cart_id", None)
         if cart_id:
             cart = Cart.objects.get(id=cart_id)
@@ -204,6 +206,7 @@ class MyCartView(EcomMixin, TemplateView):
 class CheckoutView(EcomMixin, CreateView):
     template_name = "checkout.html"
     form_class = CheckoutForm
+    success_message = "Order Placed Successfully"
     success_url = reverse_lazy("ecomapp:home")
 
     def checkout(self, *args, **kwargs):
@@ -248,6 +251,11 @@ class CheckoutView(EcomMixin, CreateView):
             del self.request.session["cart_id"]
             pm = form.cleaned_data.get("payment_method")
             order = form.save()
+            
+            for cart_product in cart_obj.cartproduct_set.all():
+                product = cart_product.product
+                product.stock_quantity -= cart_product.quantity
+                product.save()
             
             if pm == "Khalti":
                 return redirect(

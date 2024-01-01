@@ -11,13 +11,19 @@ class CheckoutForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ["ordered_by", "shipping_address", "mobile", "email", "payment_method"]
+        
+        
+    def clean_ordered_by(self):
+        ordered_by = self.cleaned_data.get("ordered_by")
+
+        if not ordered_by.replace(" ", "").isalpha():
+            raise forms.ValidationError("Only characters are allowed.")
+        return ordered_by
 
 
 class CustomerRegistrationForm(forms.ModelForm):
     username = forms.CharField(widget=forms.TextInput())
-    password = forms.CharField(
-        min_length=8, max_length=20, widget=forms.PasswordInput()
-    )
+    password = forms.CharField(min_length=8, max_length=20, widget=forms.PasswordInput())
     email = forms.CharField(widget=forms.EmailInput())
 
     class Meta:
@@ -34,6 +40,12 @@ class CustomerRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Customer with this username already exists.")
         return uname
 
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get("full_name")
+
+        if not full_name.replace(" ", "").isalpha():
+            raise forms.ValidationError("Only alphabetic characters are allowed.")
+        return full_name    
 
 class CustomerLoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput())
