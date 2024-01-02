@@ -56,7 +56,7 @@ class HomeView(EcomMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["myname"] = "Dipak Niroula"
+        context["myname"] = "Handicraft"
         all_products = Product.objects.all().order_by("-id")
         paginator = Paginator(all_products, 8)
         page_number = self.request.GET.get("page")
@@ -107,8 +107,7 @@ class AddToCartView(EcomMixin, TemplateView):
         cart_id = self.request.session.get("cart_id", None)
         if cart_id:
             cart_obj = Cart.objects.get(id=cart_id)
-            this_product_in_cart = cart_obj.cartproduct_set.filter(
-                product=product_obj)
+            this_product_in_cart = cart_obj.cartproduct_set.filter(product=product_obj)
 
             # item already exists in cart
             if this_product_in_cart.exists():
@@ -251,12 +250,12 @@ class CheckoutView(EcomMixin, CreateView):
             del self.request.session["cart_id"]
             pm = form.cleaned_data.get("payment_method")
             order = form.save()
-            
+
             for cart_product in cart_obj.cartproduct_set.all():
                 product = cart_product.product
                 product.stock_quantity -= cart_product.quantity
                 product.save()
-            
+
             if pm == "Khalti":
                 return redirect(
                     reverse("ecomapp:khaltirequest") + "?o_id=" + str(order.id)
@@ -614,3 +613,4 @@ class AdminProductCreateView(AdminRequiredMixin, CreateView):
         for i in images:
             ProductImage.objects.create(product=p, image=i)
         return super().form_valid(form)
+

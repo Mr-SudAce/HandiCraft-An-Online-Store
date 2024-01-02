@@ -20,18 +20,9 @@
                     <img src="{{p.image.url}}" alt="" class="img-fluid" style="height: 200px; width: 200px; "> <p> {{p.title}} </p> 
                 </a>
             </h4>
-                <p style="color: black; font-size: 14px; font-weight: bolder;"><strike style="color: red; font-weight: 400;" >Rs.{{p.marked_price}}</strike> Rs.{{p.selling_price}}</p>
-
-                <!-- {% if p.stock_quantity <= 0 %}
-                <p class="btn ml-5" style="border:1px solid red; color:red;">Out of Stock</p>
-                {% else %}
-                <a href="{% url 'ecomapp:addtocart' p.id %}" class="btn" style="background-color: green; color: aliceblue; font: 14px bolder;">Add To Cart</a>
-                {% endif %} -->
-            
+                <p style="color: black; font-size: 14px; font-weight: bolder;"><strike style="color: red; font-weight: 700;" >Rs.{{p.marked_price}}</strike> Rs.{{p.selling_price}}</p>
             </div>
-          
         </div>
-
         {% endfor %}
     </div>
     {% endfor %}
