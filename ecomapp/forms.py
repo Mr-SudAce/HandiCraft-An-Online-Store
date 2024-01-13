@@ -34,7 +34,7 @@ class CustomerRegistrationForm(forms.ModelForm):
         uname = self.cleaned_data.get("username")
 
         if not uname.replace(" ", "").isalpha():
-            raise forms.ValidationError("Only Characters are allowed.")
+            raise forms.ValidationError("ERROR: Only Characters are allowed.")
 
         if User.objects.filter(username=uname).exists():
             raise forms.ValidationError("Customer with this username already exists.")
@@ -44,9 +44,23 @@ class CustomerRegistrationForm(forms.ModelForm):
         full_name = self.cleaned_data.get("full_name")
 
         if not full_name.replace(" ", "").isalpha():
-            raise forms.ValidationError("Only alphabetic characters are allowed.")
-        return full_name    
+            raise forms.ValidationError("ERROR: Only alphabetic characters are allowed.")
+        return full_name
 
+    def clean_address(self):
+        address = self.cleaned_data.get("address")
+        
+        if not address.replace(" ", "").isalpha():
+            raise forms.ValidationError("ERROR: Only characters are allowed.")
+        return address
+    
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        
+        if not email.lower().endswith("@gmail.com"):
+            raise forms.ValidationError("Invalid email address")
+        return email
+    
 class CustomerLoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput())
     password = forms.CharField(widget=forms.PasswordInput())
