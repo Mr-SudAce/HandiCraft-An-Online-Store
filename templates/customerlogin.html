@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Login{% endblock %}
+
+{% block content %}
+<style>
+    .errorlist {
+        color: red;
+    }
+</style>
+<div class="container">
+    <div class="row" >
+        <div class="col-md-6 mx-auto" >
+            <h3 style="text-align: center; font-size: xx-large; text-transform: uppercase; background: linear-gradient(to left, white, rgb(33, 34, 34), white);color: white; padding: 5px 0; margin: -10px; width: 100%;">Customer Login Form</h3>
+            <hr>
+            <form action="" method="POST" style="margin-left: 13rem;">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="btn btn-success" style="margin-left: 4rem;">Login as a Customer</button>
+
+                {% if error %}
+                <li style="color: red;">{{error}}</li>
+                {% endif %}
+            </form>
+            <p style="text-align: center;">Forgot Password?<a href="{% url 'ecomapp:passworforgot' %}">Reset now. </a><span><br>or dont have account? <a href="{% url 'ecomapp:customerregistration' %}{% if request.GET.next %}?next={{request.GET.next}}{% endif %}">Register here </a> </span></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
