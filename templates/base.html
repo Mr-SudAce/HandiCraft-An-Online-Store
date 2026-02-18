@@ -1,16 +1,16 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Handicraft Store{% endblock %}</title>
-    <link rel="shortcut icon" href="{% static 'icon.png' %}" type="image/x-icon">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Handicraft Store{% endblock %}</title>
+        <link rel="shortcut icon" href="{% static 'icon.png' %}" type="image/x-icon">
+        <!-- Bootstrap 5 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <!-- FontAwesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
         :root {
             --primary-color: #000000;
             --secondary-color: #3498db;
@@ -32,12 +32,6 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--light-bg);
             color: var(--dark-text);
-        }
-
-        .container {
-            max-width: 180vh;
-            width: 100%;
-            margin: 0 auto
         }
 
         /* --- Reusable Components --- */
@@ -167,151 +161,185 @@
             color: #1d5b79;
         }
     </style>
-</head>
-<body>
+    </head>
+    <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'ecomapp:home' %}"> <img src="{% static 'icon.png' %}" alt="icon" width="50px" > Handicraft</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:home' %}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:allproducts' %}">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:about' %}">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:contact' %}">Contact</a></li>
-                </ul>
-                
-                <form class="d-flex me-3" action="{% url 'ecomapp:search' %}" method="GET">
-                    <input class="form-control me-2" type="search" name="keyword" placeholder="Search products..." aria-label="Search">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </form>
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-uppercase" href="{% url 'ecomapp:home' %}" style="letter-spacing: 1px;">
+                    <img src="{% static 'icon.png' %}" alt="icon" width="40" height="40" class="d-inline-block align-text-top me-2">Handicraft
+                </a>
 
-                <ul class="navbar-nav">
-                    <li class="nav-item position-relative me-3">
-                        <a class="nav-link" href="{% url 'ecomapp:mycart' %}">
-                            <i class="fas fa-shopping-cart fa-lg"></i>
-                            <span class="badge rounded-pill cart-badge" id="cart-cnt" style="background-color: var(--danger-color);">
-                                {% if request.cart %}
-                                    {{ request.cart.cartproduct_set.count }}
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </span>
-                        </a>
-                    </li>
-                    {% if request.user.is_authenticated %}
+                <!-- Mobile Cart & Toggler (Visible on Mobile, Hidden on Desktop) -->
+                <div class="d-flex align-items-center ms-auto d-lg-none">
+                    <a class="nav-link position-relative me-3 text-dark" href="{% url 'ecomapp:mycart' %}">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle border border-light rounded-circle cart-cnt" style="font-size: 0.6rem; padding: 0.35em 0.5em;">
+                            {% if request.cart %}
+                            {{ request.cart.cartproduct_set.count }}
+                            {% else %}
+                            0
+                            {% endif %}
+                        </span>
+                    </a>
+                    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <!-- Mobile Search (Visible on Mobile, Hidden on Desktop) -->
+                <div class="d-lg-none w-100 mt-3">
+                    <form action="{% url 'ecomapp:search' %}" method="GET">
+                        <div class="input-group shadow-sm rounded-pill overflow-hidden bg-light" style="border: 1px solid #eee;">
+                            <input class="form-control border-0 bg-light ps-3" type="search" name="keyword" placeholder="Search products..." aria-label="Search" style="box-shadow: none;">
+                            <button class="btn btn-link text-secondary border-0 bg-light" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-semibold">
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'ecomapp:home' %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'ecomapp:allproducts' %}">Products</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'ecomapp:about' %}">About</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'ecomapp:contact' %}">Contact</a></li>
+                    </ul>
+
+                    <!-- Desktop Search (Visible on Desktop, Hidden on Mobile) -->
+                    <form class="d-none d-lg-flex me-3" action="{% url 'ecomapp:search' %}" method="GET">
+                        <div class="input-group shadow-sm rounded-pill overflow-hidden bg-light" style="border: 1px solid #eee; width: 20em;">
+                            <input class="form-control border-0 bg-light ps-3" type="search" name="keyword" placeholder="Search..." aria-label="Search" style="box-shadow: none;">
+                            <button class="btn btn-link text-secondary border-0 bg-light" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Desktop Cart (Visible on Desktop, Hidden on Mobile) -->
+                    <a class="nav-link position-relative me-4 text-dark d-none d-lg-block" href="{% url 'ecomapp:mycart' %}">
+                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle border border-light rounded-circle cart-cnt" style="font-size: 0.6rem; padding: 0.35em 0.5em;">
+                            {% if request.cart %}
+                            {{ request.cart.cartproduct_set.count }}
+                            {% else %}
+                            0
+                            {% endif %}
+                        </span>
+                    </a>
+
+                    <ul class="navbar-nav border-lg-0 mt-2 mt-lg-0 pt-2 pt-lg-0 gap-2">
+                        {% if request.user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle fa-lg"></i> {{ request.user.username }}
+                                <i class="fas fa-user-circle me-1"></i> {{ request.user.username }}
                             </a>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                 <li><a class="dropdown-item" href="{% url 'ecomapp:customerprofile' %}">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'ecomapp:customerlogout' %}">Logout</a></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'ecomapp:customerlogout' %}">Logout</a></li>
                             </ul>
                         </li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:customerlogin' %}">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'ecomapp:customerregistration' %}">Register</a></li>
-                    {% endif %}
-                </ul>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link rounded-pill" style="width: 5em;border: 1px solid var(--primary-color);text-align: center;" href="{% url 'ecomapp:customerlogin' %}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link btn btn-primary-custom text-white rounded-pill" style="width: 5em; text-align: center;" href="{% url 'ecomapp:customerregistration' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Messages -->
-    <div class="container mt-3">
-        {% if messages %}
+        <!-- Messages -->
+        <div class="container mt-3">
+            {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
             {% endfor %}
-        {% endif %}
-    </div>
+            {% endif %}
+        </div>
 
-    <!-- Main Content -->
-    <div class="container" style="min-height: 60vh;">
-        {% block content %}{% endblock %}
-    </div>
+        <!-- Main Content -->
+        <div class="container" style="min-height: 60vh;">
+            {% block content %}{% endblock %}
+        </div>
 
-    <!-- Footer -->
-    <footer class="footer mt-5 py-5 border-top border-secondary ">
-        <div class="container">
-            <div class="row ">
-                <!-- Brand Info -->
-                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase mb-4 fw-bold">Handicraft</h5>
-                    <p>
-                        Discover unique, handmade items crafted with love and passion. 
-                        Beautify your home with our exclusive collection.
-                    </p>
-                </div>
+        <!-- Footer -->
+        <footer class="footer mt-5 py-5 border-top border-secondary ">
+            <div class="container">
+                <div class="row ">
+                    <!-- Brand Info -->
+                    <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-4 fw-bold">Handicraft</h5>
+                        <p>
+                            Discover unique, handmade items crafted with love and passion.
+                            Beautify your home with our exclusive collection.
+                        </p>
+                    </div>
 
-                <!-- Quick Links -->
-                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase mb-4 fw-bold">Quick Links</h5>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><a href="{% url 'ecomapp:home' %}" class="text-white text-decoration-none">Home</a></li>
-                        <li class="mb-2"><a href="{% url 'ecomapp:allproducts' %}" class="text-white text-decoration-none">Products</a></li>
-                        <li class="mb-2"><a href="{% url 'ecomapp:about' %}" class="text-white text-decoration-none">About Us</a></li>
-                        <li class="mb-2"><a href="{% url 'ecomapp:contact' %}" class="text-white text-decoration-none">Contact</a></li>
-                    </ul>
-                </div>
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-4 fw-bold">Quick Links</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><a href="{% url 'ecomapp:home' %}" class="text-white text-decoration-none">Home</a></li>
+                            <li class="mb-2"><a href="{% url 'ecomapp:allproducts' %}" class="text-white text-decoration-none">Products</a></li>
+                            <li class="mb-2"><a href="{% url 'ecomapp:about' %}" class="text-white text-decoration-none">About Us</a></li>
+                            <li class="mb-2"><a href="{% url 'ecomapp:contact' %}" class="text-white text-decoration-none">Contact</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Contact Info -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase mb-4 fw-bold">Contact</h5>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Kathmandu, Nepal</li>
-                        <li class="mb-2"><i class="fas fa-envelope me-2"></i> contact@handicraft.com</li>
-                        <li class="mb-2"><i class="fas fa-phone me-2"></i> +977 987-6543210</li>
-                    </ul>
-                </div>
+                    <!-- Contact Info -->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-4 fw-bold">Contact</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Kathmandu, Nepal</li>
+                            <li class="mb-2"><i class="fas fa-envelope me-2"></i> contact@handicraft.com</li>
+                            <li class="mb-2"><i class="fas fa-phone me-2"></i> +977 987-6543210</li>
+                        </ul>
+                    </div>
 
-                <!-- Social Media -->
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5 class="text-uppercase mb-4 fw-bold">Follow Us</h5>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-linkedin-in"></i></a>
+                    <!-- Social Media -->
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <h5 class="text-uppercase mb-4 fw-bold">Follow Us</h5>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="btn btn-outline-light btn-sm"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="text-center p-3 mt-4 border-top border-secondary" style="background-color: rgba(0, 0, 0, 0.05);">
-            &copy; 2023 Handicraft Store. All rights reserved.
-        </div>
-    </footer>
-
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <div class="text-center p-3 mt-4 border-top border-secondary" style="background-color: rgba(0, 0, 0, 0.05);">
+                &copy; 2023 Handicraft Store. All rights reserved.
             </div>
-            <div class="toast-body" id="toast-message"></div>
-        </div>
-    </div>
+        </footer>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+        <!-- Toast Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toast-message"></div>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
         // AJAX Add to Cart Logic
         function addToCart(url) {
             fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(response => response.json())
             .then(data => {
                 if(data.status === 'success'){
-                    document.getElementById('cart-cnt').innerText = data.cart_count;
+                    document.querySelectorAll('.cart-cnt').forEach(el => el.innerText = data.cart_count);
                     document.getElementById('toast-message').innerText = data.message;
                     const toast = new bootstrap.Toast(document.getElementById('liveToast'));
                     toast.show();
@@ -319,5 +347,5 @@
             });
         }
     </script>
-</body>
+    </body>
 </html>

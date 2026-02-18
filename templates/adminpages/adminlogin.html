@@ -3,46 +3,114 @@
 {% block title %}Admin Login{% endblock %}
 {% block content %}
 <style>
-    .login-container {
-        margin-top: 80px;
+    body {
+        background-color: #f0f2f5;
     }
-    .card-login {
+    .admin-auth-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 0;
+    }
+    .card-auth {
         border: none;
         border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         overflow: hidden;
+        background: #fff;
+        width: 100%;
+        max-width: 450px;
     }
-    .card-header-login {
-        background-color: var(--primary-color);
+    .card-header-auth {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         color: white;
-        padding: 20px;
-    }
-    .btn-login {
-        background-color: var(--secondary-color);
+        padding: 30px 20px;
+        text-align: center;
         border: none;
-        padding: 10px;
-        font-weight: 600;
     }
-    .btn-login:hover {
-        background-color: var(--primary-color);
+    .card-header-auth h3 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .card-body-auth {
+        padding: 40px;
+    }
+    /* Targeting Django form rendering */
+    .card-body-auth p {
+        margin-bottom: 15px;
+    }
+    .card-body-auth input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        background-color: #f9f9f9;
+    }
+    .card-body-auth input:focus {
+        border-color: #2c3e50;
+        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        outline: none;
+    }
+    .card-body-auth label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+        font-size: 0.9rem;
+    }
+    .btn-auth {
+        background: #2c3e50;
         color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 10px;
+        transition: transform 0.2s;
+    }
+    .btn-auth:hover {
+        background: #1a252f;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .auth-footer {
+        text-align: center;
+        margin-top: 25px;
+        font-size: 0.9rem;
+        color: #777;
+    }
+    .auth-footer a {
+        color: #2c3e50;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth-footer a:hover {
+        text-decoration: underline;
     }
 </style>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 mx-auto login-container">
-            <div class="card card-login">
-                <div class="card-header card-header-login text-center">
-                    <h3>Admin Login</h3>
+<div class="container admin-auth-wrapper">
+    <div class="card card-auth">
+        <div class="card-header card-header-auth">
+            <h3><i class="fas fa-user-shield me-2"></i>Admin Login</h3>
+        </div>
+        <div class="card-body card-body-auth">
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{form.as_p}}
+                <button class="btn btn-auth">Login to Dashboard</button>
+                {% if error %}
+                <div class="alert alert-danger mt-3 text-center p-2" role="alert">
+                    {{error}}
                 </div>
-                <div class="card-body p-4">
-                    <form action="" method="POST">
-                        {% csrf_token %}
-                        {{form.as_p}}
-                        <button class="btn btn-primary btn-login w-100 mt-3">Login</button>
-                        {% if error %}<p class="text-danger text-center mt-3">{{error}}</p>{% endif %}
-                    </form>
-                </div>
+                {% endif %}
+            </form>
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'ecomapp:adminregister' %}">Register here</a></p>
             </div>
         </div>
     </div>

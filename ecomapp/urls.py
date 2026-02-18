@@ -44,7 +44,7 @@ urlpatterns = [
     # Admin Side pages
 
     path("admin-login/", AdminLoginView.as_view(), name="adminlogin"),
-    path("admin-register/", AdminRegistrationView.as_view(), name="adminregistration"),
+    path("admin-register/", AdminRegistrationView.as_view(), name="adminregister"),
     path("admin-home/", AdminHomeView.as_view(), name="adminhome"),
     path("admin-order/<int:pk>/", AdminOrderDetailView.as_view(),
          name="adminorderdetail"),
