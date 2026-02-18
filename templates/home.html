@@ -92,6 +92,11 @@
         text-decoration: line-through;
         color: #999;
     }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 0;
+        color: #6c757d;
+    }
 
 </style>
 
@@ -174,7 +179,11 @@
 </div>
 
 {% else %}
-<p style="font-size: large;font-weight: 800;text-align: center; margin: auto ;">No Product Available</p>
+<div class="empty-state">
+    <i class="fas fa-box-open fa-4x mb-3"></i>
+    <h3>No Products Available</h3>
+    <p>We are currently updating our inventory. Please check back later.</p>
+</div>
 {% endif %}
 
 {% endblock %}

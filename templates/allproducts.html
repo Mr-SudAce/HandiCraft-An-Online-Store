@@ -119,54 +119,53 @@
 </style>
 
 <div class="container py-5">
+    {% if allcategories %}
     <div class="text-center mb-5">
         <h2 class="fw-bold display-5">Our Collection</h2>
         <p class="text-muted mx-auto" style="max-width: 600px;">Explore our wide range of handcrafted products, made with love and precision.</p>
     </div>
-
-    {% if allcategories %}
     {% for cat in allcategories %}
     {% if cat.product_set.all %}
     <div class="category-section">
         <h3 class="category-title">{{cat.title}}</h3>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-        {% for p in cat.product_set.all %}
-        <div class="col">
-            <div class="product-card">
-                <div class="product-img-wrapper">
-                    <a href="{% url 'ecomapp:productdetail' p.slug %}">
-                        <img src="{{p.image.url}}" alt="{{p.title}}">
-                    </a>
-                    {% if p.stock_quantity <= 0 %}
-                    <span class="badge bg-danger position-absolute top-0 end-0 m-3">Out of Stock</span>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <a href="{% url 'ecomapp:productdetail' p.slug %}" class="product-title text-truncate" title="{{p.title}}">
-                        {{p.title}}
-                    </a>
-                    <div class="price-container">
-                        <span class="current-price">Rs. {{p.selling_price|intcomma}}</span>
-                        {% if p.marked_price > p.selling_price %}
-                        <span class="original-price">Rs. {{p.marked_price|intcomma}}</span>
+            {% for p in cat.product_set.all %}
+            <div class="col">
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        <a href="{% url 'ecomapp:productdetail' p.slug %}">
+                            <img src="{{p.image.url}}" alt="{{p.title}}">
+                        </a>
+                        {% if p.stock_quantity <= 0 %}
+                        <span class="badge bg-danger position-absolute top-0 end-0 m-3">Out of Stock</span>
                         {% endif %}
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{% url 'ecomapp:productdetail' p.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">View Details</a>
-                        {% if p.stock_quantity > 0 %}
-                        <button onclick="addToCart('{% url 'ecomapp:addtocart' p.id %}')" class="btn-cart-icon" title="Add to Cart">
-                            <i class="fas fa-cart-plus"></i>
-                        </button>
-                        {% else %}
-                        <button class="btn btn-secondary btn-sm rounded-circle" style="width: 40px; height: 40px;" disabled>
-                            <i class="fas fa-ban"></i>
-                        </button>
-                        {% endif %}
+                    <div class="card-body">
+                        <a href="{% url 'ecomapp:productdetail' p.slug %}" class="product-title text-truncate" title="{{p.title}}">
+                            {{p.title}}
+                        </a>
+                        <div class="price-container">
+                            <span class="current-price">Rs. {{p.selling_price|intcomma}}</span>
+                            {% if p.marked_price > p.selling_price %}
+                            <span class="original-price">Rs. {{p.marked_price|intcomma}}</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'ecomapp:productdetail' p.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">View Details</a>
+                            {% if p.stock_quantity > 0 %}
+                            <button onclick="addToCart('{% url 'ecomapp:addtocart' p.id %}')" class="btn-cart-icon" title="Add to Cart">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            {% else %}
+                            <button class="btn btn-secondary btn-sm rounded-circle" style="width: 40px; height: 40px;" disabled>
+                                <i class="fas fa-ban"></i>
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
         </div>
     </div>
     {% endif %}
