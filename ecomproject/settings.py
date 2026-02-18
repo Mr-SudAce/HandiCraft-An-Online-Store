@@ -140,6 +140,6 @@ EMAIL_HOST_PASSWORD = "yourowngmailpassword"
 
 
 # ////Superadmin [admin panel]/////
-# username : admin
-# email: admin@admin.com
-# pw : admin123
+# username : superadmin
+# email: super@admin.com
+# pw : super@admin

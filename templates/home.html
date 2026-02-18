@@ -5,6 +5,96 @@
 
 {% block content %}
 
+<style>
+    .product-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: #fff;
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .product-img-wrapper {
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        position: relative;
+        overflow: hidden;
+        padding: 20px;
+    }
+    
+    .product-img-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+    }
+    
+    .product-card:hover .product-img-wrapper img {
+        transform: scale(1.05);
+    }
+    
+    .product-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark-text);
+        text-decoration: none;
+        display: block;
+    }
+    
+    .price-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-cart-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-cart-icon:hover {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+
+    .current-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .original-price {
+        font-size: 0.9rem;
+        text-decoration: line-through;
+        color: #999;
+    }
+
+</style>
+
 <!-- Hero Section -->
 <div class="p-5 mb-4 rounded-3 mt-4" style="background: var(--gradient-primary); color: var(--white);">
     <div class="container-fluid py-5">
@@ -15,30 +105,46 @@
 </div>
 
 <!-- Products Grid -->
+{% if product_list %}
+
 <h3 class="mb-4 border-bottom pb-2">Latest Products</h3>
-<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     {% for product in product_list %}
     <div class="col">
-        <div class="card h-100">
-            <div style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-                {% else %}
-                    <img src="https://via.placeholder.com/200" class="card-img-top" alt="No Image">
+        <div class="product-card">
+            <div class="product-img-wrapper">
+                <a href="{% url 'ecomapp:productdetail' product.slug %}">
+                    {% if product.image %}
+                    <img src="{{product.image.url}}" alt="{{product.title}}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/200" alt="No Image">
+                    {% endif %}
+                </a>
+                {% if product.stock_quantity <= 0 %}
+                <span class="badge bg-danger position-absolute top-0 end-0 m-3">Out of Stock</span>
                 {% endif %}
             </div>
-            <div class="card-body d-flex flex-column">
-                <h5 class="card-title text-truncate">{{ product.title }}</h5>
-                <p class="card-text text-muted small">{{ product.category.title }}</p>
-                <div class="mt-auto">
-                    <h5 class="text-price mb-3">Rs. {{ product.selling_price|intcomma }} <small class="text-muted text-decoration-line-through fs-6">Rs. {{ product.marked_price|intcomma }}</small></h5>
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'ecomapp:productdetail' product.slug %}" class="btn btn-outline-secondary btn-sm">View Details</a>
-                        <!-- AJAX Add to Cart Button -->
-                        <button onclick="addToCart('{% url 'ecomapp:addtocart' product.id %}')" class="btn btn-primary-custom btn-sm">
-                            <i class="fas fa-cart-plus"></i> Add to Cart
-                        </button>
-                    </div>
+            <div class="card-body">
+                <a href="{% url 'ecomapp:productdetail' product.slug %}" class="product-title text-truncate" title="{{product.title}}">
+                    {{product.title}}
+                </a>
+                <div class="price-container">
+                    <span class="current-price">Rs. {{product.selling_price|intcomma}}</span>
+                    {% if product.marked_price > product.selling_price %}
+                    <span class="original-price">Rs. {{product.marked_price|intcomma}}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'ecomapp:productdetail' product.slug %}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">View Details</a>
+                    {% if product.stock_quantity > 0 %}
+                    <button onclick="addToCart('{% url 'ecomapp:addtocart' product.id %}')" class="btn-cart-icon" title="Add to Cart">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                    {% else %}
+                    <button class="btn btn-secondary btn-sm rounded-circle" style="width: 40px; height: 40px;" disabled>
+                        <i class="fas fa-ban"></i>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -51,14 +157,24 @@
     <nav aria-label="Page navigation">
         <ul class="pagination">
             {% if product_list.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ product_list.previous_page_number }}">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ product_list.previous_page_number }}">Previous</a></li>
             {% endif %}
-            <li class="page-item active"><span class="page-link">{{ product_list.number }}</span></li>
+            {% for i in product_list.paginator.page_range %}
+            {% if product_list.number == i %}
+            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
             {% if product_list.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ product_list.next_page_number }}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ product_list.next_page_number }}">Next</a></li>
             {% endif %}
         </ul>
     </nav>
 </div>
+
+{% else %}
+<p style="font-size: large;font-weight: 800;text-align: center; margin: auto ;">No Product Available</p>
+{% endif %}
 
 {% endblock %}

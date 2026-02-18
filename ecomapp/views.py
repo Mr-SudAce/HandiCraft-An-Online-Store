@@ -48,7 +48,7 @@ class EcomMixin(object):
         if cart_id:
             try:
                 cart_obj = Cart.objects.get(id=cart_id)
-                if request.user.is_authenticated and request.user.customer:
+                if request.user.is_authenticated and hasattr(request.user, "customer"):
                     cart_obj.customer = request.user.customer
                     cart_obj.save()
                 request.cart = cart_obj
@@ -234,7 +234,7 @@ class CheckoutView(EcomMixin, CreateView):
     success_url = reverse_lazy("ecomapp:home")
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.customer:
+        if request.user.is_authenticated and hasattr(request.user, "customer"):
             pass
         else:
             return redirect("/login/?next=/checkout/")
@@ -249,6 +249,15 @@ class CheckoutView(EcomMixin, CreateView):
             cart_obj = None
         context["cart"] = cart_obj
         return context
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.request.user.is_authenticated and hasattr(self.request.user, "customer"):
+            customer = self.request.user.customer
+            initial["ordered_by"] = customer.full_name
+            initial["shipping_address"] = customer.address
+            initial["email"] = self.request.user.email
+        return initial
 
     def form_valid(self, form):
         cart_id = self.request.session.get("cart_id")

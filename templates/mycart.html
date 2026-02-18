@@ -1,55 +1,211 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %} My cart{% endblock %}
 
 {% block content %}
-<div class="container" style="margin-top: 3rem;">
-    <div class="row" style="justify-content: center; text-transform: uppercase;">
-        <div class="col-md-12">
-            <h3 class="page-header">My Cart</h3>
-            
-            <table class="table">
-                <thead style="text-align: center; font-size:medium;">
-                    <tr>
-                        <th>SNo.</th>
-                        <th>Product</th>
-                        <th>Rate</th>
-                        <th>Quantity</th>
-                        <th>Subtotal</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cp in cart.cartproduct_set.all %}
-                    <tr style="text-align: center;">
-                        <td>{{forloop.counter}}</td>
-                        <td>{{cp.product.title}}</td>
-                        <td>{{cp.rate}}</td>
-                        <td>{{cp.quantity}}</td>
-                        <td>{{cp.subtotal}}</td>
-                        <td>
-                            <a href="{% url 'ecomapp:managecart' cp.id %}?action=inc" class="btn btn-sm btn-secondary"> + </a>
-                            <a href="{% url 'ecomapp:managecart' cp.id %}?action=dcr" class="btn btn-sm btn-secondary"> - </a>
-                            <a href="{% url 'ecomapp:managecart' cp.id %}?action=rmv" class="btn btn-sm btn-danger-custom"> x </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    <tr style="text-align: center;">
-                        <th colspan="4" style="font-size: large; text-align: center;">Total</th>
-                        <th style="font-size: large;">Rs. {{cart.total}}</th>
-                        {% if cart.cartproduct_set.all %}
-                        <th><a class="btn btn-primary-custom" href="{% url 'ecomapp:checkout' %} "> Check out
-                            </a></th>
-                        {% endif %}
-                    </tr>
-                    {% if cart.cartproduct_set.all %}
-                    <tr>
-                        <th><a href="{% url 'ecomapp:emptycart' %}" class="btn btn-danger-custom">Empty Cart</a></th>
-                    </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+<style>
+    .cart-container {
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        padding: 2rem;
+    }
+    .cart-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .cart-item {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    .product-image {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        padding: 5px;
+    }
+    .product-title {
+        font-weight: 600;
+        color: var(--dark-text);
+        text-decoration: none;
+    }
+    .product-title:hover {
+        color: var(--primary-color);
+    }
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 50px;
+        width: fit-content;
+    }
+    .quantity-control .btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: none;
+        font-weight: bold;
+        color: #555;
+    }
+    .quantity-control .btn:hover {
+        background-color: #f0f0f0;
+    }
+    .quantity-control .quantity-display {
+        padding: 0 10px;
+        font-weight: 600;
+        min-width: 20px;
+        text-align: center;
+    }
+    .remove-btn {
+        color: var(--danger-color);
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+    }
+    .summary-card {
+        background-color: #f8f9fa;
+        border-radius: 15px;
+        padding: 2rem;
+        position: sticky;
+        top: 120px; /* Adjust based on your navbar height */
+    }
+    .summary-card h4 {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    .empty-cart-container {
+        text-align: center;
+        padding: 4rem 0;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row g-4" id="cart-content">
+        {% if cart and cart.cartproduct_set.all %}
+        <!-- Cart Items -->
+        <div class="col-lg-8">
+            <div class="cart-container">
+                <div class="cart-header d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">Shopping Cart</h3>
+                    <span class="text-muted">{{ cart.cartproduct_set.count }} Items</span>
+                </div>
+
+                {% for cp in cart.cartproduct_set.all %}
+                <div class="row cart-item align-items-center" id="cart-item-{{cp.id}}">
+                    <div class="col-md-2 col-3">
+                        <img src="{{cp.product.image.url}}" alt="{{cp.product.title}}" class="product-image">
+                    </div>
+                    <div class="col-md-4 col-9">
+                        <a href="{% url 'ecomapp:productdetail' cp.product.slug %}" class="product-title">{{cp.product.title}}</a>
+                        <p class="text-muted small mb-0">Price: Rs. {{cp.rate|intcomma}}</p>
+                    </div>
+                    <div class="col-md-3 col-6 mt-3 mt-md-0">
+                        <div class="quantity-control mx-auto mx-md-0">
+                            <button class="btn btn-sm" onclick="updateCart('{% url 'ecomapp:managecart' cp.id %}?action=dcr', {{cp.id}})">-</button>
+                            <span class="quantity-display" id="item-qty-{{cp.id}}">{{cp.quantity}}</span>
+                            <button class="btn btn-sm" onclick="updateCart('{% url 'ecomapp:managecart' cp.id %}?action=inc', {{cp.id}})">+</button>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4 mt-3 mt-md-0 text-end fw-bold" id="item-subtotal-{{cp.id}}">
+                        Rs. {{cp.subtotal|intcomma}}
+                    </div>
+                    <div class="col-md-1 col-2 mt-3 mt-md-0 text-end">
+                        <button class="remove-btn" onclick="updateCart('{% url 'ecomapp:managecart' cp.id %}?action=rmv', {{cp.id}})" title="Remove Item">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="d-flex justify-content-between pt-4">
+                    <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Continue Shopping</a>
+                    <a href="{% url 'ecomapp:emptycart' %}" class="btn btn-outline-danger">Empty Cart</a>
+                </div>
+            </div>
         </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="summary-card">
+                <h4 class="fw-bold">Order Summary</h4>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="fw-bold" id="cart-total">Rs. {{cart.total|intcomma}}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Shipping</span>
+                    <span class="fw-bold text-success">Free</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <span class="fs-5 fw-bold">Grand Total</span>
+                    <span class="fs-4 fw-bold text-primary" id="summary-total">Rs. {{cart.total|intcomma}}</span>
+                </div>
+                <a href="{% url 'ecomapp:checkout' %}" class="btn btn-primary-custom btn-lg w-100 shadow-sm">
+                    Proceed to Checkout
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="empty-cart-container">
+                <i class="fas fa-shopping-cart fa-4x mb-4 text-muted"></i>
+                <h3 class="fw-bold">Your Cart is Empty</h3>
+                <p class="text-muted">Looks like you haven't added anything yet. Let's go find something!</p>
+                <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-primary-custom btn-lg mt-3">Continue Shopping</a>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<script>
+function updateCart(url, cp_id) {
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success'){
+            // Update total and count in navbar and summary
+            document.querySelectorAll('.cart-cnt').forEach(el => el.innerText = data.cart_count);
+            if(document.getElementById('cart-total')) {
+                document.getElementById('cart-total').innerText = 'Rs. ' + data.cart_total.toLocaleString();
+            }
+            if(document.getElementById('summary-total')) {
+                document.getElementById('summary-total').innerText = 'Rs. ' + data.cart_total.toLocaleString();
+            }
+
+            if (data.action === 'rmv' || (data.action === 'dcr' && data.item_qty === 0)) {
+                // Remove the item row
+                document.getElementById('cart-item-' + cp_id).remove();
+            } else {
+                // Update item quantity and subtotal
+                document.getElementById('item-qty-' + cp_id).innerText = data.item_qty;
+                document.getElementById('item-subtotal-' + cp_id).innerText = 'Rs. ' + data.item_subtotal.toLocaleString();
+            }
+
+            // Check if cart is now empty
+            if (data.cart_count === 0) {
+                document.getElementById('cart-content').innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-cart-container">
+                            <i class="fas fa-shopping-cart fa-4x mb-4 text-muted"></i>
+                            <h3 class="fw-bold">Your Cart is Empty</h3>
+                            <p class="text-muted">Looks like you haven't added anything yet. Let's go find something!</p>
+                            <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-primary-custom btn-lg mt-3">Continue Shopping</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    });
+}
+</script>
 {% endblock %}
