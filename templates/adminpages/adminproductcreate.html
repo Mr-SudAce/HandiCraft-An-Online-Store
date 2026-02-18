@@ -100,11 +100,4 @@
         </div>
     </div>
 </div>
-<script>
-    document.getElementById("id_title").addEventListener("keyup", function() {
-        let title = this.value;
-        let slug = title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
-        document.getElementById("id_slug").value = slug;
-    });
-</script>
 {% endblock %}

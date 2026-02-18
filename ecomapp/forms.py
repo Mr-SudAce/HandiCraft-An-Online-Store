@@ -98,7 +98,6 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = [
             "title",
-            "slug",
             "category",
             "image",
             "marked_price",
@@ -113,12 +112,6 @@ class ProductForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "placeholder": "Enter the product title here...",
-                }
-            ),
-            "slug": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Enter the unique slug here...",
                 }
             ),
             "category": forms.Select(attrs={"class": "form-control"}),
@@ -160,13 +153,10 @@ class ProductForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ["title", "slug"]
+        fields = ["title"]
         widgets = {
             "title": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Category Title"}
-            ),
-            "slug": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Unique Slug"}
             ),
         }
 
