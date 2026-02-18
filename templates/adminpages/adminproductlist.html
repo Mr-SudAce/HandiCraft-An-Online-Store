@@ -1,35 +1,73 @@
 {% extends 'adminpages/adminbase.html' %}
 {% block title %}All Products{% endblock %}
 
-
 {% block content %}
-<div class="container"> 
-    <div class="row">
-        <div class="col-md-12">
-            <h3>All Product list</h3><hr>
-            <a href="{% url 'ecomapp:adminproductcreate' %}">Add New Product</a>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>SN</th>
-                        <th>Product Title</th>
-                        <th>Image</th>
-                        <th>Price</th>
-                        <th>Views</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in allproducts %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td>{{p.title}}</td>
-                        <td><img src="{{p.image.url}}" style="height: 60px;" alt=""></td>
-                        <td>{{p.selling_price}}</td>
-                        <td>{{p.view_count}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<style>
+    .product-card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+    .product-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .btn-add-new {
+        background-color: #27ae60;
+        border: none;
+        color: white;
+    }
+    .btn-add-new:hover {
+        background-color: #219150;
+        color: white;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="mt-4">All Products</h1>
+    <div class="card product-card">
+        <div class="card-header product-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-box me-1"></i>Product Inventory</span>
+            <a href="{% url 'ecomapp:adminproductcreate' %}" class="btn btn-add-new btn-sm"><i class="fas fa-plus me-1"></i> Add New Product</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SN</th>
+                            <th>Product Title</th>
+                            <th>Image</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in allproducts %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td><a href="{% url 'ecomapp:productdetail' p.slug %}" target="_blank">{{p.title}}</a></td>
+                            <td><img src="{{p.image.url}}" style="height: 50px; width: 50px; object-fit: cover;" alt="{{p.title}}"></td>
+                            <td>Rs. {{p.selling_price}}</td>
+                            <td>
+                                {% if p.stock_quantity > 0 %}
+                                    {{p.stock_quantity}}
+                                {% else %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>{{p.view_count}}</td>
+                            <td>
+                                <a href="{% url 'ecomapp:adminproductupdate' p.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'ecomapp:adminproductdelete' p.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

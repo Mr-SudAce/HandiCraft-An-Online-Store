@@ -1,35 +1,63 @@
 {% extends "adminpages/adminbase.html" %}
 
 {% block title %}Admin Home{% endblock %}
-
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Pending Orders</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>SN</th>
-                        <th>Order ID </th>
-                        <th>Customer</th>
-                        <th>Ordered On</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in pendingorders %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td><a href="{% url 'ecomapp:adminorderdetail' order.id %}">#ORDER_{{order.id}}</a></td>
-                        <td>{{order.ordered_by}}</td>
-                        <td>{{order.created_at}}</td>
-                        <td>{{order.total}}</td>
-
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<style>
+    .dashboard-welcome {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .card-custom {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    }
+    .card-header-custom {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        font-weight: 600;
+        padding: 15px;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="mt-4 dashboard-welcome">Dashboard</h1>
+    <p class="text-muted">Welcome back, Admin! Here is an overview of your store.</p>
+    <div class="card card-custom">
+        <div class="card-header card-header-custom">
+            <i class="fas fa-clock me-1"></i>
+            Pending Orders
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SN</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Ordered On</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in pendingorders %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td><a href="{% url 'ecomapp:adminorderdetail' order.id %}">#ORDER_{{order.id}}</a></td>
+                            <td>{{order.ordered_by}}</td>
+                            <td>{{order.created_at|date:"Y-m-d H:i"}}</td>
+                            <td>Rs. {{order.total}}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No pending orders.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

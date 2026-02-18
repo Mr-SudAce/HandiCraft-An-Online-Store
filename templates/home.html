@@ -1,67 +1,64 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Home | Handicraft{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 200%; justify-content: center;">
-    <div class="row" style="justify-content: center; gap: 10px;">
-        {% for p in product_list %}
-        <div class="card">
-            <div style="justify-content: center;">
-                <h4><a href="{% url 'ecomapp:productdetail' p.slug %}" style="text-decoration: none; font-size: 15px;">
-                        <img src="{{p.image.url}}" alt="" class="img-fluid p-1" style="height: 220px; width: 220px; "> <br>
-                        <span class="p-2"> {{p.title}} </span>
-                    </a></h4>
-                <p class="mt-3 pl-2" style="color: black; font: 14px bolder;"><strike
-                        style="color: red; font-weight: bolder;">Rs.{{p.marked_price}}</strike>
-                    Rs.{{p.selling_price}}
-                </p>
 
-                <!-- <a href="{% url 'ecomapp:addtocart' p.id %}" class="btn" style="background-color: green; color: aliceblue; font: 14px bolder;">Add To Cart</a> -->
+<!-- Hero Section -->
+<div class="p-5 mb-4 rounded-3 mt-4" style="background: var(--gradient-primary); color: var(--white);">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Welcome to {{ myname }}</h1>
+        <p class="col-md-8 fs-4">Discover unique, handmade items crafted with love and passion. Beautify your home with our exclusive collection.</p>
+        <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-light btn-lg" type="button">Shop Now</a>
+    </div>
+</div>
 
-                <!-- {% if p.stock_quantity <= 0 %}
-                <a  class="btn p-2 mb-2 " style=" color: red; font: 14px bolder; border: 1px solid red;">Out of Stock</a>
+<!-- Products Grid -->
+<h3 class="mb-4 border-bottom pb-2">Latest Products</h3>
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for product in product_list %}
+    <div class="col">
+        <div class="card h-100">
+            <div style="height: 200px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="max-height: 100%; max-width: 100%; object-fit: contain;">
                 {% else %}
-                <a href="{% url 'ecomapp:addtocart' p.id %}" class="btn p-2 mb-2 " style="background-color: green; color: aliceblue; font: 14px bolder;">Add To Cart</a>
-                {% endif %} -->
-
+                    <img src="https://via.placeholder.com/200" class="card-img-top" alt="No Image">
+                {% endif %}
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title text-truncate">{{ product.title }}</h5>
+                <p class="card-text text-muted small">{{ product.category.title }}</p>
+                <div class="mt-auto">
+                    <h5 class="text-price mb-3">Rs. {{ product.selling_price|intcomma }} <small class="text-muted text-decoration-line-through fs-6">Rs. {{ product.marked_price|intcomma }}</small></h5>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'ecomapp:productdetail' product.slug %}" class="btn btn-outline-secondary btn-sm">View Details</a>
+                        <!-- AJAX Add to Cart Button -->
+                        <button onclick="addToCart('{% url 'ecomapp:addtocart' product.id %}')" class="btn btn-primary-custom btn-sm">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-    <nav aria-label="..." style="margin-top: 20px;">
-        <ul class="pagination" style="justify-content: center;">
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="mt-5 d-flex justify-content-center">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
             {% if product_list.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ product_list.previous_page_number }}">
-                    << </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                    << </a>
-            </li>
+                <li class="page-item"><a class="page-link" href="?page={{ product_list.previous_page_number }}">Previous</a></li>
             {% endif %}
-
-            {% for i in product_list.paginator.page_range %}
-            {% if i == product_list.number %}
-            <li class="page-item active"><a class="page-link">{{i}}</a></li>
-            {% else %}
-            <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
-            {% endif %}
-            {% endfor %}
-
+            <li class="page-item active"><span class="page-link">{{ product_list.number }}</span></li>
             {% if product_list.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ product_list.next_page_number }}"> >> </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true"> >> </a>
-            </li>
+                <li class="page-item"><a class="page-link" href="?page={{ product_list.next_page_number }}">Next</a></li>
             {% endif %}
         </ul>
     </nav>
-
 </div>
+
 {% endblock %}

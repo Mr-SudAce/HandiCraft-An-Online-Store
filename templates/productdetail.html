@@ -1,134 +1,87 @@
-{% extends 'base.html' %} {% block title %}{{product.title}}{% endblock %}
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{product.title}} | Handicraft{% endblock %}
+
 {% block content %}
-<style>
-    #desp {
-        max-height: 100px;
-
-        overflow: hidden;
-    }
-
-    #SM {
-        display: block;
-    }
-</style>
-<div class="container">
-    <h3 style="
-      text-align: center;
-      font-size: x-large;
-      text-transform: uppercase;
-      background: linear-gradient(to left, white, rgb(0, 0, 0), white);
-      color: white;
-      font-weight: bolder;
-      padding: 5px 0;
-      margin: -10px;
-      width: 100%;
-    ">
-        Product: {{product.title}}
-    </h3>
-    <hr />
-    <h5 class="p-2" style="
-      margin-left: -15px;
-      font-weight: bolder;
-      border-radius: 6px;
-      font-size: x-large;
-      background: linear-gradient(to right, gray, white);
-    ">
-        <span style="color: white;">Category:</span><span> {{product.category}}</span>
-    </h5>
-    <div class="row" style="margin-top: 1rem">
-        <!-- image -->
-        <div class="col-md-3" style="border-radius: 4px">
-            <img src="{{product.image.url}}" width="300px" alt="" class="img-fluid"/>
-            <div class="row">
-                {% for pi in product.productimage_set.all %}
-                <div class="col-md-4">
-                    <a href="{{pi.image.url}}" target="_blank">
-                        <img src="{{pi.image.url}}" class="img-fluid" style="height: 100px; object-fit: contain"
-                            alt="" />
-                    </a>
+<div class="container mt-5 mb-5">
+    <div class="card shadow-sm border-0">
+        <div class="row g-0">
+            <!-- Product Image Section -->
+            <div class="col-md-5 p-4 d-flex flex-column align-items-center bg-light">
+                <div class="main-image mb-3" style="width: 100%; height: 400px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 8px; overflow: hidden;">
+                    <img src="{{product.image.url}}" alt="{{product.title}}" class="img-fluid" style="max-height: 100%; object-fit: contain;">
                 </div>
-                {% endfor %}
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    {% for pi in product.productimage_set.all %}
+                        <a href="{{pi.image.url}}" target="_blank" class="border rounded p-1 bg-white" style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                            <img src="{{pi.image.url}}" class="img-fluid" style="max-height: 100%; max-width: 100%;" alt="Product Image">
+                        </a>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <!-- <h5 class="p-2" style=" margin-left: -15px; font-weight: bolder; border-radius: 6px; font-size: xx-large; background: linear-gradient(to right, gray, white);">Category:<span> {{product.category}}</span> </h5> -->
-            <h4 style="
-          font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial,
-            sans-serif;
-          font-size: 20px;
-        ">
-                {{product.title}}
-                <br />
-                <!-- <span style="font-size: 10px;"> (Viewed {{product.view_count}} times)</span>  -->
-            </h4>
-            <br />
+            <!-- Product Details Section -->
+            <div class="col-md-7 p-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'ecomapp:home' %}" class="text-decoration-none text-muted">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'ecomapp:allproducts' %}" class="text-decoration-none text-muted">Products</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{product.title}}</li>
+                    </ol>
+                </nav>
 
-            <div style="margin-top: 8rem">
-                <h5 style="color: black; font: 15px bolder;">
-                    Price:
-                    <strike style="color: red; font-weight: bolder">Rs. {{product.marked_price}}</strike>
-                    Rs.{{product.selling_price}}
-                </h5>
-                <hr style="margin-left: 1px; width: 25%" />
+                <h2 class="fw-bold text-dark mb-2">{{product.title}}</h2>
+                <p class="text-muted mb-3">Category: <span class="badge bg-secondary">{{product.category}}</span></p>
 
-                <span style="
-            color: orangered;
-            font-size: 12px;
-            font-family: Arial, Helvetica, sans-serif;
-            font-weight: bolder;
-          ">{{product.stock_quantity}} in Stock</span>
-                <br />
-                {% if product.stock_quantity <= 0 %} <a class="p-2" style="
-            margin-top: 5px;
-            color: red;
-            border: 1px solid red;
-            border-radius: 4px;
-            font: 14px bolder;
-          ">Out of Stock</a>
-                    {% else %}
-
-                    <!-- <p> <input style="width: 50px;" type="number" name="QTY"></p> -->
-
-                    <a href="{% url 'ecomapp:addtocart' product.id %}" class="p-2" style="
-            background-color: green;
-            border-radius: 4px;
-            text-decoration: none;
-            color: aliceblue;
-            font: 14px bolder;
-          ">Add To Cart</a>
+                <div class="mb-3">
+                    <span class="h3 text-price fw-bold me-2">Rs. {{product.selling_price|intcomma}}</span>
+                    {% if product.marked_price > product.selling_price %}
+                        <span class="text-muted text-decoration-line-through">Rs. {{product.marked_price|intcomma}}</span>
                     {% endif %}
-                    <p style="
-            padding-top: -5px;
-            margin-top: 18px;
-            font-style: italic;
-            font-weight: bolder;
-          ">
-                        Warranty:
-                        <span style="font-style: italic; color: cadetblue">{{product.warranty}}</span>
-                    </p>
-                    <p style="
-            padding: 0;
-            margin-top: -10px;
-            font-style: italic;
-            font-weight: bolder;
-          ">
-                        Return Policy:
-                        <span style="font-style: italic; color: cadetblue">{{product.return_policy}}</span>
-                    </p>
+                </div>
+
+                <p class="text-muted mb-4" style="line-height: 1.6;">
+                    {{product.description}}
+                </p>
+
+                <div class="d-flex align-items-center mb-4">
+                    {% if product.stock_quantity > 0 %}
+                        <span class="badge me-3" style="background-color: var(--accent-color);">In Stock: {{product.stock_quantity}}</span>
+                        <button onclick="addToCart('{% url 'ecomapp:addtocart' product.id %}')" class="btn btn-primary-custom btn-lg px-4 shadow-sm">
+                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                        </button>
+                    {% else %}
+                        <span class="badge me-3" style="background-color: var(--danger-color);">Out of Stock</span>
+                        <button class="btn btn-secondary btn-lg px-4" disabled>Out of Stock</button>
+                    {% endif %}
+                </div>
+
+                <div class="row mt-4 border-top pt-3">
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-shield-alt fa-lg me-3" style="color: var(--secondary-color);"></i>
+                            <div>
+                                <small class="text-muted d-block">Warranty</small>
+                                <span class="fw-bold" style="color: var(--primary-color);">{{product.warranty}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-undo fa-lg me-3" style="color: var(--secondary-color);"></i>
+                            <div>
+                                <small class="text-muted d-block">Return Policy</small>
+                                <span class="fw-bold" style="color: var(--primary-color);">{{product.return_policy}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3 text-muted small">
+                    <i class="fas fa-eye me-1"></i> Viewed {{product.view_count}} times
+                </div>
             </div>
-        </div>
-        <div style="padding: 0 5px 2px 2px; max-width: 450px; text-align: justify">
-            <p style="font-size: 12px; color: black; font-weight: bolder">
-                <span style="color: chocolate; font-size: 15px">Description:</span>
-                <br />
-                <span style="
-            margin-left: 1rem;
-            color: grey;
-            font-family: 'Times New Roman', Times, serif;
-          ">{{product.description}}
-                </span>
-            </p>
         </div>
     </div>
 </div>

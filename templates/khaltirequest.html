@@ -1,12 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
 <html>
 <head>
     <script src="https://unpkg.com/khalti-checkout-web@latest/dist/khalti-checkout.iffe.js"></script>
 </head>
 <body>
-    <h3>Your order amount is Rs. {{order.total}}</h3>
-    
-    <button id="payment-button">Pay with Khalti</button>
-    <a href="/">Go to Home page</a>
+    <div class="container mt-5 text-center">
+        <h3 class="page-header">Pay with Khalti</h3>
+        <h4 class="mb-4">Your order amount is <span class="text-price">Rs. {{order.total}}</span></h4>
+        <button id="payment-button" class="btn btn-primary-custom btn-lg">Pay with Khalti</button>
+        <br><br>
+        <a href="/" class="btn btn-outline-secondary">Go to Home page</a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
@@ -61,3 +66,4 @@
     <!-- Paste this code anywhere in you body tag -->
 </body>
 </html>
+{% endblock %}

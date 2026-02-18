@@ -1,5 +1,5 @@
 from django import forms
-from .models import Order, Customer, Product
+from .models import Order, Customer, Product, Admin, Category
 from django.contrib.auth.models import User
 
 
@@ -67,6 +67,27 @@ class CustomerLoginForm(forms.Form):
     username = forms.CharField(widget=forms.TextInput())
     password = forms.CharField(widget=forms.PasswordInput())
 
+class AdminRegistrationForm(forms.ModelForm):
+    username = forms.CharField(widget=forms.TextInput())
+    password = forms.CharField(widget=forms.PasswordInput())
+    email = forms.CharField(widget=forms.EmailInput())
+
+    class Meta:
+        model = Admin
+        fields = ["username", "password", "email", "full_name", "image", "mobile"]
+
+    def clean_username(self):
+        uname = self.cleaned_data.get("username")
+        if User.objects.filter(username=uname).exists():
+            raise forms.ValidationError("Username already exists.")
+        return uname
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already exists.")
+        return email
+
 
 class ProductForm(forms.ModelForm):
     more_images = forms.FileField(
@@ -84,6 +105,7 @@ class ProductForm(forms.ModelForm):
             "selling_price",
             "description",
             "warranty",
+            "stock_quantity",
             "return_policy",
         ]
         widgets = {
@@ -134,6 +156,19 @@ class ProductForm(forms.ModelForm):
             ),
         }
 
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["title", "slug"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Category Title"}
+            ),
+            "slug": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Unique Slug"}
+            ),
+        }
 
 class PasswordForgotForm(forms.Form):
     email = forms.CharField(

@@ -3,19 +3,14 @@
 {% block title %}Add to cart{% endblock %}
 
 {% block content %}
-<style>
-    .container{
-        margin-top: 15rem;
-    }
-    .container h3{
-        text-align: center;
-        color: darkred;
-        text-transform: capitalize;
-    }
-    
-</style>
 {%load static%}
-<div class="container">
-    <h3 >Product added to cart successfully. </h3><span style="margin-left: 48rem;"><a href="{% url 'ecomapp:allproducts' %}" style="color: green;">Click To Add more Products</a></span>
+<div class="container mt-5 text-center">
+    <div class="card custom-card p-5">
+        <div class="card-body">
+            <h3 class="mb-4" style="color: var(--accent-color);"><i class="fas fa-check-circle fa-2x"></i><br>Product added to cart successfully.</h3>
+            <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-primary-custom me-2">Continue Shopping</a>
+            <a href="{% url 'ecomapp:mycart' %}" class="btn btn-outline-secondary">Go to Cart</a>
+        </div>
+    </div>
 </div>
 {% endblock %}

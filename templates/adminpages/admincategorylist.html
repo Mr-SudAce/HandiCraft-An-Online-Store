@@ -1,0 +1,62 @@
+{% extends 'adminpages/adminbase.html' %}
+{% block title %}All Categories{% endblock %}
+
+{% block content %}
+<style>
+    .category-card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+    .category-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .btn-add-new {
+        background-color: #27ae60;
+        border: none;
+        color: white;
+    }
+    .btn-add-new:hover {
+        background-color: #219150;
+        color: white;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="mt-4">All Categories</h1>
+    <div class="card category-card">
+        <div class="card-header category-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-tags me-1"></i>Category List</span>
+            <a href="{% url 'ecomapp:admincategorycreate' %}" class="btn btn-add-new btn-sm"><i class="fas fa-plus me-1"></i> Add New Category</a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SN</th>
+                            <th>Title</th>
+                            <th>Slug</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in allcategories %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{cat.title}}</td>
+                            <td>{{cat.slug}}</td>
+                            <td>
+                                <a href="{% url 'ecomapp:admincategoryupdate' cat.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'ecomapp:admincategorydelete' cat.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

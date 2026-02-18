@@ -1,47 +1,51 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Login{% endblock %}
+{% block title %}Admin Registration{% endblock %}
+
 {% block content %}
 <style>
-    .login-container {
-        margin-top: 80px;
+    .register-container {
+        margin-top: 50px;
+        margin-bottom: 50px;
     }
-    .card-login {
+    .card-register {
         border: none;
         border-radius: 15px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         overflow: hidden;
     }
-    .card-header-login {
+    .card-header-register {
         background-color: var(--primary-color);
         color: white;
         padding: 20px;
     }
-    .btn-login {
+    .btn-register {
         background-color: var(--secondary-color);
         border: none;
         padding: 10px;
         font-weight: 600;
     }
-    .btn-login:hover {
+    .btn-register:hover {
         background-color: var(--primary-color);
         color: white;
     }
 </style>
 <div class="container">
     <div class="row">
-        <div class="col-md-6 mx-auto login-container">
-            <div class="card card-login">
-                <div class="card-header card-header-login text-center">
-                    <h3>Admin Login</h3>
+        <div class="col-md-6 mx-auto register-container">
+            <div class="card card-register">
+                <div class="card-header card-header-register text-center">
+                    <h3>Admin Registration</h3>
                 </div>
                 <div class="card-body p-4">
-                    <form action="" method="POST">
+                    <form action="" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{form.as_p}}
-                        <button class="btn btn-primary btn-login w-100 mt-3">Login</button>
-                        {% if error %}<p class="text-danger text-center mt-3">{{error}}</p>{% endif %}
+                        <button class="btn btn-primary btn-register w-100 mt-3">Register</button>
                     </form>
+                    <p class="text-center mt-3">
+                        Already have an account? <a href="{% url 'ecomapp:adminlogin' %}">Login here</a>
+                    </p>
                 </div>
             </div>
         </div>

@@ -1,7 +1,82 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}About us{% endblock %}
+{% block title %}About Us | Handicraft{% endblock %}
 
 {% block content %}
-    <h1>Every Creation Is Unique In Its Own Way!</h1>
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h2 class="display-4 fw-bold mb-4" style="color: var(--primary-color);">Every Creation Is Unique In Its Own Way!</h2>
+            <p class="lead text-muted mb-4">
+                Welcome to Handicraft, where tradition meets modern elegance. We are dedicated to bringing you the finest handmade artifacts, crafted with passion and precision by skilled artisans from around the globe.
+            </p>
+            <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-primary-custom btn-lg px-4 shadow-sm">Explore Our Collection</a>
+        </div>
+        <div class="col-lg-6 mt-4 mt-lg-0">
+            <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Handicraft Art" class="img-fluid rounded shadow-lg">
+        </div>
+    </div>
+
+    <!-- Our Mission Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h3 class="section-header d-inline-block px-5">Our Mission</h3>
+            <p class="text-muted mt-3 w-75 mx-auto fs-5">
+                Our mission is to preserve and promote the rich heritage of traditional craftsmanship. We believe in empowering artisans by providing them a platform to showcase their talent to the world, ensuring that these age-old techniques continue to thrive in the modern era.
+            </p>
+        </div>
+    </div>
+
+    <!-- Features / Why Choose Us -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card custom-card text-center p-4 h-100">
+                <div class="card-body">
+                    <i class="fas fa-hands fa-3x mb-3" style="color: var(--secondary-color);"></i>
+                    <h5 class="card-title fw-bold">Handmade with Love</h5>
+                    <p class="card-text text-muted">Each item is uniquely crafted by hand, ensuring no two pieces are exactly alike.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card custom-card text-center p-4 h-100">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-3x mb-3" style="color: var(--accent-color);"></i>
+                    <h5 class="card-title fw-bold">Quality Assurance</h5>
+                    <p class="card-text text-muted">We strictly monitor quality to ensure you receive only the best artifacts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card custom-card text-center p-4 h-100">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x mb-3" style="color: var(--warning-color);"></i>
+                    <h5 class="card-title fw-bold">Support Artisans</h5>
+                    <p class="card-text text-muted">Your purchase directly supports the livelihoods of skilled local artisans.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <!-- <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h3 class="section-header d-inline-block px-5">Meet The Team</h3>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm text-center h-100 py-3">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-user-tie fa-4x text-secondary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">John Doe</h5>
+                    <p class="text-muted small mb-2">Founder & CEO</p>
+                    <p class="card-text text-muted">Passionate about art and culture, leading the vision of Handicraft.</p>
+                </div>
+            </div>
+        </div>
+    </div> -->
+</div>
 {% endblock %}

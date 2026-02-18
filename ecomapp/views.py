@@ -1,5 +1,4 @@
-from django.template import RequestContext
-from django.test import RequestFactory
+import requests
 from django.views.generic import (
     View,
     TemplateView,
@@ -7,6 +6,8 @@ from django.views.generic import (
     FormView,
     DetailView,
     ListView,
+    UpdateView,
+    DeleteView,
 )
 from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
@@ -45,10 +46,15 @@ class EcomMixin(object):
     def dispatch(self, request, *args, **kwargs):
         cart_id = request.session.get("cart_id")
         if cart_id:
-            cart_obj = Cart.objects.get(id=cart_id)
-            if request.user.is_authenticated and request.user.customer:
-                cart_obj.customer = request.user.customer
-                cart_obj.save()
+            try:
+                cart_obj = Cart.objects.get(id=cart_id)
+                if request.user.is_authenticated and request.user.customer:
+                    cart_obj.customer = request.user.customer
+                    cart_obj.save()
+                request.cart = cart_obj
+            except Cart.DoesNotExist:
+                del request.session["cart_id"]
+                request.cart = None
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -89,9 +95,7 @@ class ProductDetailView(EcomMixin, TemplateView):
         return context
 
 
-class AddToCartView(EcomMixin, TemplateView):
-    template_name = "addtocart.html"
-
+class AddToCartView(EcomMixin, View):
     def get(self, request, *args, **kwargs):
         # get product id from requested url
         product_id = self.kwargs["pro_id"]
@@ -146,7 +150,7 @@ class AddToCartView(EcomMixin, TemplateView):
             })
         
         messages.success(request, "Item added to cart")
-        return super().get(request, *args, **kwargs)
+        return redirect(request.META.get("HTTP_REFERER", reverse("ecomapp:home")))
 
 
 class ManageCartView(EcomMixin, View):
@@ -156,6 +160,8 @@ class ManageCartView(EcomMixin, View):
         cp_obj = CartProduct.objects.get(id=cp_id)
         cart_obj = cp_obj.cart
 
+        item_removed = False
+
         if action == "inc":
             cp_obj.quantity += 1
             cp_obj.subtotal += cp_obj.rate
@@ -163,31 +169,36 @@ class ManageCartView(EcomMixin, View):
             cart_obj.total += cp_obj.rate
             cart_obj.save()
         elif action == "dcr":
-            cp_obj.quantity -= 1
-            cp_obj.subtotal -= cp_obj.rate
-            cp_obj.save()
-            cart_obj.total -= cp_obj.rate
-            cart_obj.save()
-            if cp_obj.quantity == 0:
+            if cp_obj.quantity > 1:
+                cp_obj.quantity -= 1
+                cp_obj.subtotal -= cp_obj.rate
+                cp_obj.save()
+                cart_obj.total -= cp_obj.rate
+                cart_obj.save()
+            else:
+                cart_obj.total -= cp_obj.subtotal
+                cart_obj.save()
                 cp_obj.delete()
+                item_removed = True
         elif action == "rmv":
             cart_obj.total -= cp_obj.subtotal
             cart_obj.save()
             cp_obj.delete()
+            item_removed = True
         else:
             pass
-        
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({
                 "status": "success",
                 "message": "Cart updated",
                 "cart_total": cart_obj.total,
                 "cart_count": cart_obj.cartproduct_set.count(),
-                "item_qty": cp_obj.quantity if action != "rmv" else 0,
-                "item_subtotal": cp_obj.subtotal if action != "rmv" else 0,
+                "item_qty": 0 if item_removed else cp_obj.quantity,
+                "item_subtotal": 0 if item_removed else cp_obj.subtotal,
                 "action": action,
             })
-            
+
         return redirect("ecomapp:mycart")
 
 
@@ -222,19 +233,6 @@ class CheckoutView(EcomMixin, CreateView):
     success_message = "Order Placed Successfully"
     success_url = reverse_lazy("ecomapp:home")
 
-    def checkout(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
-
-        super(CheckoutForm, self).checkout(*args, **kwargs)
-
-        if user:
-            self.fields["order_by"].initial = user.get_full_name()
-            self.fields["phone"].initial = user.phone
-            self.fields["email"].initial = user.email
-            self.fields["address"].initial = user.address
-        else:
-            pass
-
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.customer:
             pass
@@ -261,14 +259,29 @@ class CheckoutView(EcomMixin, CreateView):
             form.instance.discount = 0
             form.instance.total = cart_obj.total
             form.instance.order_status = "Order Received"
-            del self.request.session["cart_id"]
             pm = form.cleaned_data.get("payment_method")
-            order = form.save()
 
-            for cart_product in cart_obj.cartproduct_set.all():
-                product = cart_product.product
-                product.stock_quantity -= cart_product.quantity
-                product.save()
+            with transaction.atomic():
+                # Lock products to prevent race conditions on stock
+                products_in_cart = [cp.product for cp in cart_obj.cartproduct_set.all()]
+                Product.objects.select_for_update().filter(id__in=[p.id for p in products_in_cart])
+
+                # Check stock again before creating order
+                for cart_product in cart_obj.cartproduct_set.all():
+                    product = cart_product.product
+                    if product.stock_quantity < cart_product.quantity:
+                        messages.error(self.request, f"Not enough stock for {product.title}. Only {product.stock_quantity} left.")
+                        return redirect("ecomapp:mycart")
+
+                order = form.save()
+
+                # Deduct stock
+                for cart_product in cart_obj.cartproduct_set.all():
+                    product = cart_product.product
+                    product.stock_quantity -= cart_product.quantity
+                    product.save()
+
+            del self.request.session["cart_id"]
 
             if pm == "Khalti":
                 return redirect(
@@ -306,7 +319,7 @@ class KhaltiVerifyView(View):
 
         order_obj = Order.objects.get(id=o_id)
 
-        response = RequestContext.post(url, payload, headers=headers)
+        response = requests.post(url, data=payload, headers=headers)
         resp_dict = response.json()
         if resp_dict.get("idx"):
             success = True
@@ -341,7 +354,7 @@ class EsewaVerifyView(View):
             "rid": refId,
             "pid": oid,
         }
-        resp = RequestFactory.post(url, d)
+        resp = requests.post(url, d)
         root = ET.fromstring(resp.content)
         status = root[0].text.strip()
 
@@ -355,7 +368,7 @@ class EsewaVerifyView(View):
             return redirect("/esewa-request/?o_id=" + order_id)
 
 
-class CustomerRegistrationView(CreateView):
+class CustomerRegistrationView(EcomMixin, CreateView):
     template_name = "customerregistration.html"
     form_class = CustomerRegistrationForm
     success_url = reverse_lazy("ecomapp:home")
@@ -383,7 +396,7 @@ class CustomerLogoutView(View):
         return redirect("ecomapp:home")
 
 
-class CustomerLoginView(FormView):
+class CustomerLoginView(EcomMixin, FormView):
     template_name = "customerlogin.html"
     form_class = CustomerLoginForm
     success_url = reverse_lazy("ecomapp:home")
@@ -461,7 +474,7 @@ class CustomerOrderDetailView(DetailView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class SearchView(TemplateView):
+class SearchView(EcomMixin, TemplateView):
     template_name = "search.html"
 
     def get_context_data(self, **kwargs):
@@ -477,7 +490,7 @@ class SearchView(TemplateView):
         return context
 
 
-class PasswordForgotView(FormView):
+class PasswordForgotView(EcomMixin, FormView):
     template_name = "forgotpassword.html"
     form_class = PasswordForgotForm
     success_url = "/forgot-password/?m=s"
@@ -510,7 +523,7 @@ class PasswordForgotView(FormView):
         return super().form_valid(form)
 
 
-class PasswordResetView(FormView):
+class PasswordResetView(EcomMixin, FormView):
     template_name = "passwordreset.html"
     form_class = PasswordResetForm
     success_url = "/login/"
@@ -557,6 +570,19 @@ class AdminLoginView(FormView):
             )
         return super().form_valid(form)
 
+
+class AdminRegistrationView(CreateView):
+    template_name = "adminpages/adminregister.html"
+    form_class = AdminRegistrationForm
+    success_url = reverse_lazy("ecomapp:adminlogin")
+
+    def form_valid(self, form):
+        username = form.cleaned_data.get("username")
+        password = form.cleaned_data.get("password")
+        email = form.cleaned_data.get("email")
+        user = User.objects.create_user(username, email, password)
+        form.instance.user = user
+        return super().form_valid(form)
 
 class AdminRequiredMixin(object):
     def dispatch(self, request, *args, **kwargs):
@@ -615,6 +641,11 @@ class AdminProductListView(AdminRequiredMixin, ListView):
     queryset = Product.objects.all().order_by("-id")
     context_object_name = "allproducts"
 
+class AdminCategoryListView(AdminRequiredMixin, ListView):
+    template_name = "adminpages/admincategorylist.html"
+    queryset = Category.objects.all().order_by("-id")
+    context_object_name = "allcategories"
+
 
 class AdminProductCreateView(AdminRequiredMixin, CreateView):
     template_name = "adminpages/adminproductcreate.html"
@@ -627,3 +658,39 @@ class AdminProductCreateView(AdminRequiredMixin, CreateView):
         for i in images:
             ProductImage.objects.create(product=p, image=i)
         return super().form_valid(form)
+
+class AdminCategoryCreateView(AdminRequiredMixin, CreateView):
+    template_name = "adminpages/admincategorycreate.html"
+    form_class = CategoryForm
+    success_url = reverse_lazy("ecomapp:adminproductlist")
+
+
+class AdminProductUpdateView(AdminRequiredMixin, UpdateView):
+    template_name = "adminpages/adminproductupdate.html"
+    form_class = ProductForm
+    success_url = reverse_lazy("ecomapp:adminproductlist")
+    model = Product
+
+    def form_valid(self, form):
+        p = form.save()
+        images = self.request.FILES.getlist("more_images")
+        for i in images:
+            ProductImage.objects.create(product=p, image=i)
+        return super().form_valid(form)
+
+
+class AdminProductDeleteView(AdminRequiredMixin, DeleteView):
+    template_name = "adminpages/adminproductdelete.html"
+    success_url = reverse_lazy("ecomapp:adminproductlist")
+    model = Product
+
+class AdminCategoryUpdateView(AdminRequiredMixin, UpdateView):
+    template_name = "adminpages/admincategoryupdate.html"
+    form_class = CategoryForm
+    success_url = reverse_lazy("ecomapp:admincategorylist")
+    model = Category
+
+class AdminCategoryDeleteView(AdminRequiredMixin, DeleteView):
+    template_name = "adminpages/admincategorydelete.html"
+    success_url = reverse_lazy("ecomapp:admincategorylist")
+    model = Category

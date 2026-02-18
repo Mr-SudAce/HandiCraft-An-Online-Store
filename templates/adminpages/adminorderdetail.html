@@ -1,58 +1,102 @@
 {% extends 'adminpages/adminbase.html' %}
 {% load humanize %}
 
-{% block title %}Order Detail{% endblock  %}
-
+{% block title %}Order Detail{% endblock %}
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <h3>Order Detail</h3>
+<style>
+    .detail-card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+    .detail-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .section-title {
+        color: var(--secondary-color);
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #555;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="mt-4">Order Detail</h1>
+    <div class="card detail-card">
+        <div class="card-header detail-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-info-circle me-1"></i>Order #ORDER_{{ord_obj.id}}</span>
+            <span class="badge bg-primary">{{ ord_obj.order_status }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="section-title">Customer Details</h5>
+                    <p><span class="info-label">Ordered By:</span> {{ ord_obj.ordered_by }}</p>
+                    <p><span class="info-label">Mobile:</span> {{ ord_obj.mobile }}</p>
+                    <p><span class="info-label">Email:</span> {{ ord_obj.email }}</p>
+                    <p><span class="info-label">Shipping Address:</span> {{ ord_obj.shipping_address }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="section-title">Order & Payment</h5>
+                    <p><span class="info-label">Ordered On:</span> {{ ord_obj.created_at|date:"Y-m-d H:i" }} ({{ord_obj.created_at|timesince}} ago)</p>
+                    <p><span class="info-label">Payment Method:</span> {{ ord_obj.payment_method }}</p>
+                    <p><span class="info-label">Payment Status:</span>
+                        {% if ord_obj.payment_completed %}
+                            <span class="badge bg-success">Completed</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
             <hr>
-            <p><span class="font-weight-bold">Order ID: </span> #ORDER_{{ord_obj.id}}</p>
-            <p><span class="font-weight-bold">Order Status: </span> {{ord_obj.order_status}}</p>
-            <p><span class="font-weight-bold">Order On: </span> {{ord_obj.created_at}}({{ord_obj.created_at|timesince}} ago)</p>
-            <p><span class="font-weight-bold">Customer Information: </span> By {{ord_obj.ordered_by}}, {{ord_obj.mobile}}</p>
-            <p><span class="font-weight-bold">Shipping Address: </span> By {{ord_obj.shipping_address}} ({{ord_obj.email}})</p>
-            <p><span class="font-weight-bold">Payment Information: </span>  Using {{ord_obj.payment_method}} ({% if ord_obj.payment_completed %}Payment Completed{% else %}Not Paid{% endif %})</p>
-            <h4>Ordered Items</h4>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>SN</th>
-                        <th>Item</th>
-                        <th>Rate</th>
-                        <th>Quantity</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cp in ord_obj.cart.cartproduct_set.all %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td><a target="_blank"
-                                href="{% url 'ecomapp:productdetail' cp.product.slug %}">{{cp.product.title}}({{cp.product.id}})</a>
-                        </td>
-                        <td>{{cp.rate}}</td>
-                        <td>{{cp.quantity}}</td>
-                        <td>{{cp.subtotal}}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr>
-                        <th colspan="4" class="text-right">Total: </th>
-                        <th>Rs {{ord_obj.total|intcomma}}/-</th>
-                    </tr>
-                </tbody>
-            </table>
-            <form action="{% url 'ecomapp:adminorderstatuschange' ord_obj.id %}" method="POST">
+
+            <h5 class="section-title">Ordered Items</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SN</th>
+                            <th>Item</th>
+                            <th>Rate</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cp in ord_obj.cart.cartproduct_set.all %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td><a target="_blank" href="{% url 'ecomapp:productdetail' cp.product.slug %}">{{cp.product.title}}</a></td>
+                            <td>Rs. {{cp.rate|intcomma}}</td>
+                            <td>{{cp.quantity}}</td>
+                            <td>Rs. {{cp.subtotal|intcomma}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <th colspan="4" class="text-end">Total:</th>
+                            <th>Rs. {{ord_obj.total|intcomma}}/-</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr>
+            <h5 class="section-title">Change Order Status</h5>
+            <form action="{% url 'ecomapp:adminorderstatuschange' ord_obj.id %}" method="POST" class="d-flex">
                 {% csrf_token %}
-                <select name="status">
+                <select name="status" class="form-select me-2" style="width: 200px;">
                     {% for i, j in allstatus %}
                     <option value="{{i}}" {% if i == ord_obj.order_status %}selected{% endif %}>{{j}}</option>
                     {% endfor %}
                 </select>
-                <button class="btn btn-info">Change</button>
-                
+                <button class="btn btn-primary">Update Status</button>
             </form>
         </div>
     </div>

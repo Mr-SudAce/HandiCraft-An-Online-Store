@@ -44,6 +44,7 @@ urlpatterns = [
     # Admin Side pages
 
     path("admin-login/", AdminLoginView.as_view(), name="adminlogin"),
+    path("admin-register/", AdminRegistrationView.as_view(), name="adminregistration"),
     path("admin-home/", AdminHomeView.as_view(), name="adminhome"),
     path("admin-order/<int:pk>/", AdminOrderDetailView.as_view(),
          name="adminorderdetail"),
@@ -57,6 +58,15 @@ urlpatterns = [
          name="adminproductlist"),
     path("admin-product/add/", AdminProductCreateView.as_view(),
          name="adminproductcreate"),
+    path("admin-product/<int:pk>/update/", AdminProductUpdateView.as_view(), name="adminproductupdate"),
+    path("admin-product/<int:pk>/delete/", AdminProductDeleteView.as_view(), name="adminproductdelete"),
+
+    path("admin-category/list/", AdminCategoryListView.as_view(),
+         name="admincategorylist"),
+    path("admin-category/add/", AdminCategoryCreateView.as_view(),
+         name="admincategorycreate"),
+    path("admin-category/<int:pk>/update/", AdminCategoryUpdateView.as_view(), name="admincategoryupdate"),
+    path("admin-category/<int:pk>/delete/", AdminCategoryDeleteView.as_view(), name="admincategorydelete"),
 
      path('product/update_stock/<int:product_id>/', views.update_stock, name='update_stock'),
 

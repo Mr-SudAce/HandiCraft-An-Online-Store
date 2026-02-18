@@ -1,6 +1,6 @@
 {% extends 'adminpages/adminbase.html' %}
 
-{% block title %}Add New Product{% endblock %}
+{% block title %}Update Product{% endblock %}
 {% block content %}
 <style>
     /* Internal CSS for Product Create Form */
@@ -79,20 +79,20 @@
     }
 </style>
 <div class="container-fluid">
-    <h1 class="mt-4">Add New Product</h1>
+    <h1 class="mt-4">Update Product</h1>
     <div class="card shadow-sm">
         <div class="card-header">
-            <i class="fas fa-plus-circle me-1"></i>
+            <i class="fas fa-edit me-1"></i>
             Product Information
         </div>
         <div class="card-body">
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <div class="form-wrapper">
-                        <form action method="POST" enctype="multipart/form-data">
+                        <form action="" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             {{form.as_p}}
-                            <button class="btn-create"><i class="fas fa-check me-2"></i>Create Product</button>
+                            <button class="btn-create"><i class="fas fa-check me-2"></i>Update Product</button>
                         </form>
                     </div>
                 </div>
@@ -101,10 +101,13 @@
     </div>
 </div>
 <script>
+    // Slug auto-generation is usually not desired on update to preserve URLs, but if needed, uncomment below:
+    /*
     document.getElementById("id_title").addEventListener("keyup", function() {
         let title = this.value;
         let slug = title.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
         document.getElementById("id_slug").value = slug;
     });
+    */
 </script>
 {% endblock %}

@@ -1,37 +1,58 @@
 {% extends 'adminpages/adminbase.html' %}
 
 {% block title %}All Orders {% endblock %}
-
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3>All Orders</h3><hr>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>SN</th>
-                        <th>Order ID </th>
-                        <th>Customer</th>
-                        <th>Ordered On</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in allorders %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td><a href="{% url 'ecomapp:adminorderdetail' order.id %}">#ORDER_{{order.id}}</a></td>
-                        <td>{{order.ordered_by}}</td>
-                        <td>{{order.created_at}}</td>
-                        <td>{{order.total}}</td>
-                        <td>{{order.order_status}}</td>
-            
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<style>
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    .card-custom {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+    .card-header-custom {
+        background-color: var(--secondary-color);
+        color: white;
+        font-weight: 600;
+        border-radius: 10px 10px 0 0 !important;
+    }
+</style>
+<div class="container-fluid">
+    <h1 class="mt-4 page-title">All Orders</h1>
+    <div class="card card-custom">
+        <div class="card-header card-header-custom">
+            <i class="fas fa-list me-1"></i>
+            Order History
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SN</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Ordered On</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in allorders %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td><a href="{% url 'ecomapp:adminorderdetail' order.id %}">#ORDER_{{order.id}}</a></td>
+                            <td>{{order.ordered_by}}</td>
+                            <td>{{order.created_at|date:"Y-m-d H:i"}}</td>
+                            <td>Rs. {{order.total}}</td>
+                            <td><span class="badge bg-info text-dark">{{order.order_status}}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
