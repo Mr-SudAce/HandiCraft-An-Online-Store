@@ -12,6 +12,7 @@ from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.core.mail import send_mail
@@ -91,20 +92,14 @@ class ProductDetailView(EcomMixin, TemplateView):
 class AddToCartView(EcomMixin, TemplateView):
     template_name = "addtocart.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
+    def get(self, request, *args, **kwargs):
         # get product id from requested url
         product_id = self.kwargs["pro_id"]
-
         # get product
-        product_obj = Product.objects.get(id=product_id)
-        # product_obj = Product.objects.get(id=product_id)
-        # product_obj.stock_quantity -= 1
-        # product_obj.save()
+        product_obj = get_object_or_404(Product, id=product_id)
 
         # check if cart exists
-        cart_id = self.request.session.get("cart_id", None)
+        cart_id = request.session.get("cart_id", None)
         if cart_id:
             cart_obj = Cart.objects.get(id=cart_id)
             this_product_in_cart = cart_obj.cartproduct_set.filter(product=product_obj)
@@ -113,8 +108,6 @@ class AddToCartView(EcomMixin, TemplateView):
             if this_product_in_cart.exists():
                 cartproduct = this_product_in_cart.last()
                 cartproduct.quantity += 1
-                product_obj.stock_quantity -= 1
-                product_obj.save()
                 cartproduct.subtotal += product_obj.selling_price
                 cartproduct.save()
                 cart_obj.total += product_obj.selling_price
@@ -133,7 +126,7 @@ class AddToCartView(EcomMixin, TemplateView):
 
         else:
             cart_obj = Cart.objects.create(total=0)
-            self.request.session["cart_id"] = cart_obj.id
+            request.session["cart_id"] = cart_obj.id
             cartproduct = CartProduct.objects.create(
                 cart=cart_obj,
                 product=product_obj,
@@ -144,7 +137,16 @@ class AddToCartView(EcomMixin, TemplateView):
             cart_obj.total += product_obj.selling_price
             cart_obj.save()
 
-        return context
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                "status": "success",
+                "message": "Item added to cart successfully",
+                "cart_total": cart_obj.total,
+                "cart_count": cart_obj.cartproduct_set.count(),
+            })
+        
+        messages.success(request, "Item added to cart")
+        return super().get(request, *args, **kwargs)
 
 
 class ManageCartView(EcomMixin, View):
@@ -174,6 +176,18 @@ class ManageCartView(EcomMixin, View):
             cp_obj.delete()
         else:
             pass
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                "status": "success",
+                "message": "Cart updated",
+                "cart_total": cart_obj.total,
+                "cart_count": cart_obj.cartproduct_set.count(),
+                "item_qty": cp_obj.quantity if action != "rmv" else 0,
+                "item_subtotal": cp_obj.subtotal if action != "rmv" else 0,
+                "action": action,
+            })
+            
         return redirect("ecomapp:mycart")
 
 
@@ -613,4 +627,3 @@ class AdminProductCreateView(AdminRequiredMixin, CreateView):
         for i in images:
             ProductImage.objects.create(product=p, image=i)
         return super().form_valid(form)
-
