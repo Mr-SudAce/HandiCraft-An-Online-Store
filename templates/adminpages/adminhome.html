@@ -3,56 +3,226 @@
 {% block title %}Admin Home{% endblock %}
 {% block content %}
 <style>
-    .dashboard-welcome {
-        color: var(--primary-color);
-        font-weight: 700;
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 15px 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         margin-bottom: 20px;
     }
-    .card-custom {
-        border: none;
+
+    .dashboard-welcome {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .welcome-text {
+        font-size: 14px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+
+    .profile-dropdown-toggle {
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.3s ease;
+        padding: 6px 10px;
+        border-radius: 8px;
+    }
+
+    .profile-dropdown-toggle:hover {
+        background-color: #f1f3f5;
+    }
+
+    .profile-avatar-sm {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e9ecef;
+    }
+
+    .dropdown-menu {
         border-radius: 10px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        padding: 8px 0;
     }
-    .card-header-custom {
-        background-color: var(--primary-color);
-        color: white;
-        border-radius: 10px 10px 0 0 !important;
+
+    .dropdown-item {
+        font-size: 14px;
+        padding: 8px 16px;
+        transition: background 0.2s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 25px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background-color: #fff;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 20px;
+    }
+
+    .stat-info h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #888;
+        font-weight: 500;
+    }
+
+    .stat-info .stat-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .icon-orders { background-color: #eaf5fb; color: #3498db; }
+    .icon-products { background-color: #e9f7ef; color: #27ae60; }
+    .icon-customers { background-color: #fff8e7; color: #f39c12; }
+    .icon-categories { background-color: #fdedec; color: #e74c3c; }
+
+    .table-custom th {
+        background-color: #f8f9fa;
+        color: #555;
         font-weight: 600;
-        padding: 15px;
+        border-top: none;
     }
+
 </style>
 <div class="container-fluid">
-    <h1 class="mt-4 dashboard-welcome">Dashboard</h1>
-    <p class="text-muted">Welcome back, Admin! Here is an overview of your store.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="dashboard-welcome mb-0">Dashboard</h1>
+        <p class="text-muted mb-0">Welcome back, {{ request.user.username }}!</p>
+        <nav class="top-navbar">
+            <div class="dropdown">
+                <a href="#" class="nav-link dropdown-toggle d-flex align-items-center profile-dropdown-toggle" id="adminProfileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if request.user.admin.image %}
+                    <img src="{{ request.user.admin.image.url }}" alt="Admin" class="profile-avatar-sm me-2">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ request.user.admin.full_name|urlencode }}&background=2c3e50&color=fff&size=38" alt="Admin" class="profile-avatar-sm me-2">
+                    {% endif %}
+                    <span class="d-none d-sm-inline fw-bold">{{ request.user.username }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="adminProfileDropdown">
+                    <li><a class="dropdown-item" href="{% url 'ecomapp:adminprofile' %}"><i class="fas fa-user-cog me-2 text-muted"></i>Profile</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'ecomapp:adminlogout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-orders"><i class="fas fa-shopping-cart"></i></div>
+                <div class="stat-info">
+                    <h5>Total Orders</h5>
+                    <span class="stat-number">{{ total_orders }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-products"><i class="fas fa-box-open"></i></div>
+                <div class="stat-info">
+                    <h5>Total Products</h5>
+                    <span class="stat-number">{{ total_products }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-customers"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <h5>Total Customers</h5>
+                    <span class="stat-number">{{ total_customers }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+                <div class="stat-icon icon-categories"><i class="fas fa-tags"></i></div>
+                <div class="stat-info">
+                    <h5>Total Categories</h5>
+                    <span class="stat-number">{{ total_categories }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Orders Table -->
     <div class="card card-custom">
         <div class="card-header card-header-custom">
-            <i class="fas fa-clock me-1"></i>
-            Pending Orders
+            <i class="fas fa-clock me-2"></i>Recent Pending Orders
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
+                <table class="table table-hover table-custom align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th>SN</th>
-                            <th>Order ID</th>
+                            <th class="ps-4">Order ID</th>
                             <th>Customer</th>
                             <th>Ordered On</th>
                             <th>Amount</th>
+                            <th class="text-end pe-4">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order in pendingorders %}
                         <tr>
-                            <td>{{forloop.counter}}</td>
-                            <td><a href="{% url 'ecomapp:adminorderdetail' order.id %}">#ORDER_{{order.id}}</a></td>
+                            <td class="ps-4"><span class="fw-bold">#{{order.id}}</span></td>
                             <td>{{order.ordered_by}}</td>
-                            <td>{{order.created_at|date:"Y-m-d H:i"}}</td>
-                            <td>Rs. {{order.total}}</td>
+                            <td>{{order.created_at|date:"M d, Y"}}</td>
+                            <td class="fw-bold">Rs. {{order.total}}</td>
+                            <td class="text-end pe-4">
+                                <a href="{% url 'ecomapp:adminorderdetail' order.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    View Details
+                                </a>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">No pending orders.</td>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <p class="text-muted">No pending orders at the moment.</p>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

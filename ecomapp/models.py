@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.contrib.auth.hashers import make_password, check_password
 
 # Create your models here.
 
@@ -10,6 +11,7 @@ class Admin(models.Model):
     full_name = models.CharField(max_length=50)
     image = models.ImageField(upload_to="admins")
     mobile = models.CharField(max_length=20)
+    username = models.CharField(max_length=100, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -18,11 +20,21 @@ class Admin(models.Model):
 
 
 class Customer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
+    username = models.CharField(max_length=200, unique=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  # hashed password
     address = models.CharField(max_length=200, null=True, blank=True)
+    mobile = models.CharField(max_length=20)
+    image = models.ImageField(upload_to="customers", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
 
     def __str__(self):
         return self.full_name

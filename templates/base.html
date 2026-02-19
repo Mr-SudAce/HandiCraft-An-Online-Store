@@ -9,8 +9,9 @@
         <!-- Bootstrap 5 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <!-- FontAwesome -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <style>
+            
         :root {
             --primary-color: #000000;
             --secondary-color: #3498db;
@@ -52,8 +53,7 @@
 
         /* Section Headers */
         .section-header {
-            background: var(--gradient-section);
-            color: var(--white);
+            color: var(--dark-text);
             padding: 10px;
             border-radius: 5px;
             text-transform: uppercase;
@@ -208,7 +208,6 @@
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'ecomapp:contact' %}">Contact</a></li>
                     </ul>
 
-                    <!-- Desktop Search (Visible on Desktop, Hidden on Mobile) -->
                     <form class="d-none d-lg-flex me-3" action="{% url 'ecomapp:search' %}" method="GET">
                         <div class="input-group shadow-sm rounded-pill overflow-hidden bg-light" style="border: 1px solid #eee; width: 20em;">
                             <input class="form-control border-0 bg-light ps-3" type="search" name="keyword" placeholder="Search..." aria-label="Search" style="box-shadow: none;">
@@ -220,7 +219,7 @@
 
                     <!-- Desktop Cart (Visible on Desktop, Hidden on Mobile) -->
                     <a class="nav-link position-relative me-4 text-dark d-none d-lg-block" href="{% url 'ecomapp:mycart' %}">
-                        <i class="fas fa-shopping-cart fa-lg"></i>
+                        <i class="fa fa-shopping-cart"></i>
                         <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle border border-light rounded-circle cart-cnt" style="font-size: 0.6rem; padding: 0.35em 0.5em;">
                             {% if request.cart %}
                             {{ request.cart.cartproduct_set.count }}
@@ -231,12 +230,35 @@
                     </a>
 
                     <ul class="navbar-nav border-lg-0 mt-2 mt-lg-0 pt-2 pt-lg-0 gap-2">
-                        {% if request.user.is_authenticated %}
+                        {% if request.user.is_authenticated and request.user.is_staff %}
+                        <!-- Admin Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i> {{ request.user.username }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" style="padding: 0.25rem 0.5rem;">
+                                {% if request.user.admin.image %}
+                                <img src="{{ request.user.admin.image.url }}" alt="Profile" style="width:36px; height:36px; object-fit:cover; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform 0.3s;">
+                                {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ request.user.username|urlencode }}&background=2c3e50&color=fff&size=36" alt="Default" style="width:36px; height:36px; object-fit:cover; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform 0.3s;">
+                                {% endif %}
+                                <span>{{ request.user.username }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li><a class="dropdown-item" href="{% url 'ecomapp:adminprofile' %}">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'ecomapp:adminlogout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% elif request.customer %}
+                        <!-- Customer Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" style="padding: 0.25rem 0.5rem;">
+                                {% if request.customer.image %}
+                                <img src="{{ request.customer.image.url }}" alt="Profile" style="width:36px; height:36px; object-fit:cover; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform 0.3s;">
+                                {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ request.customer.full_name|urlencode }}&background=3498db&color=fff&size=36" alt="Default" style="width:36px; height:36px; object-fit:cover; border-radius:50%; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform 0.3s;">
+                                {% endif %}
+                                <span>{{ request.customer.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                                 <li><a class="dropdown-item" href="{% url 'ecomapp:customerprofile' %}">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{% url 'ecomapp:customerlogout' %}">Logout</a></li>
