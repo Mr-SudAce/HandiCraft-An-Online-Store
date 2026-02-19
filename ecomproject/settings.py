@@ -139,7 +139,12 @@ EMAIL_HOST_USER = "yourowngmail@gmail.com"
 EMAIL_HOST_PASSWORD = "yourowngmailpassword"
 
 
-# ////Superadmin [admin panel]/////
+# ////Superadmin [Django admin panel]/////
 # username : superadmin
 # email: super@admin.com
 # pw : super@admin
+
+
+# //// Admin [admin panel]/////
+# username : sudesh-sutihar
+# pw : Sudesh@123
