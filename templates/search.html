@@ -1,30 +1,127 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
-{% block title %}Search {% endblock %}
+{% block title %}Search Results{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h3 class="page-header">Search Results for <span style="color: var(--warning-color);">"{{request.GET.keyword}}"</span></h3>
+<style>
+    .search-header {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    .search-term {
+        color: var(--secondary-color);
+        font-weight: 700;
+        font-style: italic;
+    }
+    .result-card {
+        background: #fff;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .result-img-wrapper {
+        height: 220px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    .result-img-wrapper img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .product-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--dark-text);
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .product-title:hover {
+        color: var(--primary-color);
+    }
+    .price-tag {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    .old-price {
+        font-size: 0.9rem;
+        text-decoration: line-through;
+        color: #999;
+        margin-left: 10px;
+    }
+    .empty-search {
+        text-align: center;
+        padding: 4rem 0;
+        color: #6c757d;
+    }
+</style>
 
+<div class="container py-5">
+    <div class="search-header">
+        <h2 class="fw-bold">Search Results</h2>
+        <p class="text-muted mb-0">Found {{ results.count }} result{{ results.count|pluralize }} for <span class="search-term">"{{ request.GET.keyword }}"</span></p>
+    </div>
+
+    {% if results %}
+        <div class="row">
             {% for result in results %}
-            <div class="card custom-card mb-4">
-                <div class="row g-0">
-                    <div class="col-md-3 d-flex align-items-center justify-content-center p-3">
-                        <img src="{{result.image.url}}" class="img-fluid rounded-start" alt="{{result.title}}" style="max-height: 200px;">
-                    </div>
-                    <div class="col-md-9">
-                        <div class="card-body">
-                            <h4 class="card-title">{{result.title}}</h4>
-                            <p class="card-text">{{result.description|truncatechars:150}}</p>
-                            <div class="mt-3">
-                                {% if result.stock_quantity <= 0 %} 
-                                    <button class="btn btn-danger-custom" disabled>Out of Stock</button>
-                                {% else %}
-                                    <a href="{% url 'ecomapp:addtocart' result.id %}" class="btn btn-primary-custom">Add To Cart</a>
-                                    <a href="{% url 'ecomapp:productdetail' result.slug %}" class="btn btn-outline-secondary ms-2">View Details</a>
-                                {% endif %}
+            <div class="col-lg-12">
+                <div class="card result-card">
+                    <div class="row g-0 align-items-center">
+                        <div class="col-md-4 col-lg-3">
+                            <div class="result-img-wrapper">
+                                <a href="{% url 'ecomapp:productdetail' result.slug %}">
+                                    <img src="{{ result.image.url }}" alt="{{ result.title }}">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-8 col-lg-9">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap">
+                                    <div>
+                                        <a href="{% url 'ecomapp:productdetail' result.slug %}" class="product-title">{{ result.title }}</a>
+                                        <p class="text-muted mb-2 small">Category: <span class="badge bg-light text-dark border">{{ result.category.title }}</span></p>
+                                    </div>
+                                    <div class="text-end mt-2 mt-md-0">
+                                        <div class="price-tag">Rs. {{ result.selling_price|intcomma }}</div>
+                                        {% if result.marked_price > result.selling_price %}
+                                        <div class="old-price">Rs. {{ result.marked_price|intcomma }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text text-muted mt-3">{{ result.description|truncatewords:30 }}</p>
+                                
+                                <div class="mt-4 d-flex gap-2 flex-wrap">
+                                    {% if result.stock_quantity > 0 %}
+                                        <button onclick="addToCart('{% url 'ecomapp:addtocart' result.id %}')" class="btn btn-primary-custom px-4 shadow-sm">
+                                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-secondary px-4" disabled>Out of Stock</button>
+                                    {% endif %}
+                                    <a href="{% url 'ecomapp:productdetail' result.slug %}" class="btn btn-outline-secondary px-4">View Details</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -32,7 +129,13 @@
             </div>
             {% endfor %}
         </div>
-    </div>
+    {% else %}
+        <div class="empty-search">
+            <i class="fas fa-search fa-4x mb-3 text-muted opacity-50"></i>
+            <h3>No results found</h3>
+            <p>We couldn't find any products matching your search. Try different keywords.</p>
+            <a href="{% url 'ecomapp:allproducts' %}" class="btn btn-primary-custom mt-3">Browse All Products</a>
+        </div>
+    {% endif %}
 </div>
-
 {% endblock %}

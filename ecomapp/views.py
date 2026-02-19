@@ -768,7 +768,7 @@ class AdminProductCreateView(AdminRequiredMixin, CreateView):
 class AdminCategoryCreateView(AdminRequiredMixin, CreateView):
     template_name = "adminpages/admincategorycreate.html"
     form_class = CategoryForm
-    success_url = reverse_lazy("ecomapp:adminproductlist")
+    success_url = reverse_lazy("ecomapp:admincategorylist")
 
 
 class AdminProductUpdateView(AdminRequiredMixin, UpdateView):
